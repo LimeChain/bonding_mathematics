@@ -1,5 +1,5 @@
 let etherSuply = 0.5;
-let tokenSuply = 1; // 1.414213562373095048;
+let tokenSuply = 1;
 let rate = 500000;
 const MAXRATE = 1000000;
 
@@ -31,28 +31,7 @@ function sellCalc(tokenAmount) {
     return (etherSuply * (1 - (1 - tokenAmount / tokenSuply) ** (1 / (rate / MAXRATE))));
 }
 
-
-// console.log("buy 1 * 100");
-// console.log(buyCalc(1));
-
 console.log("buy 10 * 1");
 for (let i = 0; i < 5; i++) {
     buy(1);
 }
-
-// console.log("etherSuply", etherSuply);
-// console.log("tokenSuply", tokenSuply);
-// //
-// console.log("sell 1 * 100");
-// // sell(495);
-//
-// console.log("buy 100 * 1");
-// for (let i = 0; i < 495; i++) {
-//     sell(1);
-// }
-// console.log("tokenSuply", tokenSuply);
-// console.log("etherSuply", etherSuply);
-// console.log("returnedEthers", returnedEthers);
-
-// 2.0710678118654755
-// 2.071067811865475244

@@ -50,9 +50,10 @@ def sqrt(num: decimal) -> uint256:
 @public
 @constant
 def calc_purchase(tokenSupply: uint256, etherSupply: uint256, etherAmount: uint256) -> uint256:
+    # tokenSupply * (sqrt(1 + (etherAmount/etherSupply)) - 1)
+
     normalization: uint256 = 1000000000000000000
 
-    # tokenSupplyAsDecimal: decimal = convert(tokenSupply, decimal)
     ethSupplyAsDecimal: decimal = convert(etherSupply, decimal)
     etherAmountAsDecimal: decimal = convert(etherAmount, decimal)
 
@@ -64,6 +65,7 @@ def calc_purchase(tokenSupply: uint256, etherSupply: uint256, etherAmount: uint2
 @public
 @constant
 def calc_sell(tokenSupply: uint256, etherSupply: uint256, tokenAmount: uint256) -> uint256:
+    # etherSuply * (1 - (1 - tokenAmount / tokenSuply) ^2)
     normalization: decimal = 1000000000000000000.0
 
     tokenSupplyAsDecimal: decimal = convert(tokenSupply, decimal)

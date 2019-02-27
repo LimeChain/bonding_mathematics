@@ -1,5 +1,5 @@
 const SQRT = require('./../contracts/Math/SQRT.json');
-const ContinuousOrganisation = require('../build/ContinuousOrganisation');
+const BondingMathematics = require('../build/BondingMathematics');
 const etherlime = require('etherlime');
 
 const deployer = new etherlime.EtherlimeGanacheDeployer();
@@ -20,7 +20,7 @@ async function deployTokensSQRT() {
     sqrtContractAddress = (await owner.provider.getTransactionReceipt(tx.hash)).contractAddress;
 }
 async function deployVyperContract() {
-    contOrgInstance = await deployer.deploy(ContinuousOrganisation, {}, sqrtContractAddress);
+    contOrgInstance = await deployer.deploy(BondingMathematics, {}, sqrtContractAddress);
 }
 
 it.only('should ', async () => {

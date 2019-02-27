@@ -5,7 +5,6 @@ const MAXRATE = 1000000;
 
 let returnedEthers = 0;
 
-
 function buy(etherAmount) {
     let tokensToMint = buyCalc(etherAmount);
     etherSuply += etherAmount;

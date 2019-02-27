@@ -3,7 +3,7 @@ pragma solidity 0.5.4;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 
-contract ContinuousOrganisation {
+contract BondingMathematics {
     using SafeMath for uint256;
 
     uint256 public tokenSupply = 1000000000000000000;

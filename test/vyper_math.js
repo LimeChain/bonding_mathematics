@@ -1,16 +1,16 @@
 const SQRT = require('./../contracts/Math/SQRT.json');
 const BondingMathematics = require('../build/BondingMathematics');
 const etherlime = require('etherlime');
+const math = require('./mathematics.js');
 
 const deployer = new etherlime.EtherlimeGanacheDeployer();
 const owner = accounts[0].signer;
 
 let sqrtContractAddress;
-let contOrgInstance;
+let bondingMathematicsInstance;
 
 const ONE_ETH = '1000000000000000000';
-const HUNDRET_ETH = '100000000000000000000';
-const TOKENS_TO_SELL = "13177446878699999999";
+const FIVE_HUNDRET_ETH = '5000000000000000000000';
 
 async function deployTokensSQRT() {
     let tx = await owner.sendTransaction({
@@ -20,29 +20,93 @@ async function deployTokensSQRT() {
     sqrtContractAddress = (await owner.provider.getTransactionReceipt(tx.hash)).contractAddress;
 }
 async function deployVyperContract() {
-    contOrgInstance = await deployer.deploy(BondingMathematics, {}, sqrtContractAddress);
+    bondingMathematicsInstance = await deployer.deploy(BondingMathematics, {}, sqrtContractAddress);
 }
 
-it.only('should ', async () => {
-    await deployTokensSQRT();
-    await deployVyperContract();
+describe('Testing Bonding Mathematics', () => {
 
-    await contOrgInstance.purchaseTokens({
-        value: ethers.utils.bigNumberify(HUNDRET_ETH)
+    beforeEach(async () => {
+        await deployTokensSQRT();
+        await deployVyperContract();
     });
 
-    let totalSypply = await contOrgInstance.returnTokenSupply();
-    console.log("totalSypply:", totalSypply.toString());
+    describe('Testing deployed contracts', () => {
+        it('should deploy SQRT.vy correctly', function () {
+            assert.isAddress(sqrtContractAddress);
+        });
 
-    let etherSypply = await contOrgInstance.returnEtherBalance();
-    console.log("etherSypply:", etherSypply.toString());
+        it('should deploy BondingMathematics correctly', function () {
+            assert.isAddress(bondingMathematicsInstance.contractAddress);
+        });
+    });
 
-    let boughtTokens = await contOrgInstance.returnTokenBought();
-    console.log("boughtTokens", boughtTokens.toString());
+    describe('Testing buying tokens', () => {
 
-    await contOrgInstance.sellTokens(TOKENS_TO_SELL);
+        it('should buy exact amount tokens for one ether', async () => {
+            await bondingMathematicsInstance.purchaseTokens({
+                value: ethers.utils.bigNumberify(ONE_ETH)
+            });
 
-    let ethersToReturn = await contOrgInstance.getEthersToReturn();
-    console.log("ethersToReturn", ethersToReturn.toString());
+            let boughtTokens = await bondingMathematicsInstance.returnTokenBought();
+            let expectedTokens = math.buyCalc(1);
 
+            console.log(`${boughtTokens} should be ~ eq to ${expectedTokens}`)
+        });
+
+        it('should buy exact amount tokens for ten thousand ethers', async () => {
+            await bondingMathematicsInstance.purchaseTokens({
+                value: ethers.utils.bigNumberify(FIVE_HUNDRET_ETH)
+            });
+
+            let boughtTokens = await bondingMathematicsInstance.returnTokenBought();
+            let expectedTokens = math.buyCalc(10000);
+
+            console.log(`${boughtTokens} should be ~ eq to ${expectedTokens}`)
+        });
+
+        it('buying tokens for 10 ethers, ether by ether should be eq to buying for 10 ether at once', async () => {
+            for (let i = 0; i < 10; i++) {
+                await bondingMathematicsInstance.purchaseTokens({
+                    value: ethers.utils.bigNumberify(ONE_ETH)
+                });
+            }
+
+            let boughtTokens = await bondingMathematicsInstance.returnTokenBought();
+            let expectedTokens = math.buyCalc(10);
+
+            console.log(`${boughtTokens} should be ~ eq to ${expectedTokens}`)
+        });
+    });
+
+    describe('Testing selling tokens', () => {
+
+        it('should sell tokens bought for one eth and receive ~ 1 eth', async () => {
+            await bondingMathematicsInstance.purchaseTokens({
+                value: ethers.utils.bigNumberify(ONE_ETH)
+            });
+
+            let boughtTokens = await bondingMathematicsInstance.returnTokenBought();
+
+            await bondingMathematicsInstance.sellTokens(boughtTokens);
+
+            let ethersToReturn = await bondingMathematicsInstance.getEthersToReturn();
+
+            console.log(`${ethersToReturn.toString()} should be ~ eq to ${ONE_ETH}`)
+        });
+
+        it('should sell tokens bought for ten thousand eth and receive ~ 10 000 eth', async () => {
+            await bondingMathematicsInstance.purchaseTokens({
+                value: ethers.utils.bigNumberify(FIVE_HUNDRET_ETH)
+            });
+
+            let boughtTokens = await bondingMathematicsInstance.returnTokenBought();
+
+            await bondingMathematicsInstance.sellTokens(boughtTokens);
+
+            let ethersToReturn = await bondingMathematicsInstance.getEthersToReturn();
+
+            console.log(`${ethersToReturn.toString()} should be ~ eq to ${FIVE_HUNDRET_ETH}`)
+        });
+    });
 });
+
